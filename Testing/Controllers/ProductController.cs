@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Testing.Models;
+using System.Web;
+using System.IO;
+using Newtonsoft.Json;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -15,7 +18,7 @@ namespace Testing.Controllers
 
         public ProductController(IProductRepository repo)
         {
-            this.repo = repo;
+            this.repo = repo;   
         }
 
         // GET: /<controller>/
@@ -26,6 +29,20 @@ namespace Testing.Controllers
             return View(products);
         }
 
+        public IActionResult Search()
+        {
+            var products = repo.GetAllProducts();
+
+            //JsonResult categoryJson = new JsonResult(products);
+            using (StreamWriter file = System.IO.File.CreateText("productsFile.json"))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Serialize(file, products);
+            }
+
+            return View();
+        }
+
         public IActionResult ViewProduct(int id)
         {
             var product = repo.GetProduct(id);
@@ -33,19 +50,20 @@ namespace Testing.Controllers
             return View(product);
         }
 
-        //public IActionResult UpdateProduct(int id)
-        //{
-        //    Product prod = repo.GetProduct(id);
+        public IActionResult UpdateProduct(Product product)
+        {
+            Product prod = repo.GetProduct(product.ProductID);
+            prod.Categories = repo.GetCategories();
 
-        //    repo.UpdateProduct(prod);
+            repo.UpdateProduct(prod);
 
-        //    if (prod == null)
-        //    {
-        //        return View("ProductNotFound");
-        //    }
+            if (prod == null)
+            {
+                return View("ProductNotFound");
+            }
 
-        //    return View(prod);
-        //}
+            return View(prod);
+        }
 
         public IActionResult UpdateProductToDatabase(Product product)
         {
@@ -83,19 +101,6 @@ namespace Testing.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult UpdateProduct(Product product)
-        {
-            Product prod = repo.GetProduct(product.ProductID);
-            prod.Categories = repo.GetCategories();
-
-            repo.UpdateProduct(prod);
-
-            if (prod == null)
-            {
-                return View("ProductNotFound");
-            }
-
-            return View(prod);
-        }
+        
     }
 }
