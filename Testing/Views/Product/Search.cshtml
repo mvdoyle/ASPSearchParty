@@ -10,22 +10,21 @@
 <body>
 
     <form class="search-form">
-        <input type="text" class="search" placeholder="City or State">
+        <input type="text" class="search" placeholder="Products">
         <ul class="suggestions">
-            <li>Filter for a city</li>
-            <li>or a state</li>
+            <li>Filter for a product</li>
         </ul>
     </form>
     <script>const endpoint = 'https://gist.githubusercontent.com/mvdoyle/1d11c297993e703df753eb414208d88e/raw/361f2e71d68090d8f7dad6da4fe354f597eb31f4/productsFile.json';
 
-const cities = [];
+const products = [];
 fetch(endpoint)
   .then(blob => blob.json())
-  .then(data => cities.push(...data));
+  .then(data => products.push(...data));
 
-function findMatches(wordToMatch, cities) {
-  return cities.filter(place => {
-    // here we need to figure out if the city or state matches what was searched
+function findMatches(wordToMatch, products) {
+  return products.filter(place => {
+    // see if product matches what was searched
     const regex = new RegExp(wordToMatch, 'gi');
       return place.Name.match(regex)
   });
@@ -36,15 +35,15 @@ function numberWithCommas(x) {
 }
 
 function displayMatches() {
-  const matchArray = findMatches(this.value, cities);
+  const matchArray = findMatches(this.value, products);
   const html = matchArray.map(place => {
     const regex = new RegExp(this.value, 'gi');
-      const cityName = place.Name.replace(regex, `<span class="hl">${this.value}</span>`);
+      const placeName = place.Name.replace(regex, `<span class="hl">${this.value}</span>`);
       
     return `
       <li>
-        <span class="name">${cityName}</span>
-        <span class="population">${numberWithCommas(place.Price)}</span>
+        <span class="name">${placeName}</span>
+        <span class="population">$${numberWithCommas(place.Price)}</span>
       </li>
     `;
   }).join('');
@@ -55,6 +54,7 @@ const searchInput = document.querySelector('.search');
 const suggestions = document.querySelector('.suggestions');
 
 searchInput.addEventListener('change', displayMatches);
-searchInput.addEventListener('keyup', displayMatches);</script>
+        searchInput.addEventListener('keyup', displayMatches);
+    </script>
 </body>
 </html>
